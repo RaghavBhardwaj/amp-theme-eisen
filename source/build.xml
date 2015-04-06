@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="amp-eisentheme" default="package-amp" basedir=".">
+
+<property name="project.dir" value="."/>
+<property file="${project.dir}/build.properties"/>
+<property file="${project.dir}/module.properties"/>
+<property file="${project.dir}/file-mapping.properties"/>
+<property name="build.dir" value="${project.dir}/build"/>
+<property name="config.dir" value="${project.dir}/config"/>
+<property name="jar.file" value="${build.dir}/lib/${module.id}.jar"/>
+<property name="amp.file" value="${build.dir}/dist/${module.id}.amp"/>
+
+<target name="mkdirs">
+<mkdir dir="${build.dir}/dist" />
+<mkdir dir="${build.dir}/lib" />
+<mkdir dir="${build.dir}/classes" />
+</target>
+
+<path id="class.path">
+<dirset dir="${build.dir}" />
+<fileset dir="${project.dir}/lib" includes="**/*.jar" />
+<fileset dir="${alfresco.sdk.dir}/lib/server" includes="**/*.jar" />
+</path>
+
+<target name="clean">
+<delete dir="${build.dir}" />
+</target>
+
+<target name="compile" depends="mkdirs"> 
+<javac classpathref="class.path" debug="${debug}" srcdir="${project.dir}/java" 
+destdir="${build.dir}/classes" target="1.5" encoding="UTF-8" includeantruntime="false"/>
+<copy todir="${build.dir}/classes">
+<fileset dir="${project.dir}/java" defaultexcludes="false">
+<exclude name="**/*.java"/>
+<exclude name="**/.svn/**"/>
+<exclude name="**/CVS/**"/>
+</fileset>
+</copy>
+</target>
+
+<target name="package-jar" depends="compile">
+<jar destfile="${jar.file}" encoding="UTF-8">
+<fileset dir="${build.dir}/classes" excludes="**/custom*,**/*Test*" defaultexcludes="false" />
+</jar>
+</target>
+
+<target name="package-amp" depends="package-jar" description="Package the Module" >
+<zip destfile="${amp.file}" encoding="UTF-8">
+<fileset dir="${project.dir}/build" includes="lib/*.jar" />
+<fileset dir="${project.dir}" includes="config/**/*.*" excludes="**/module.properties" />
+<fileset dir="${project.dir}">
+<include name="module.properties"/>
+<include name="file-mapping.properties" />
+<include name="WEB-INF/**/*" />
+<include name="lib/**/*" />
+<exclude name="WEB-INF/alfresco.tld"/>
+<exclude name="WEB-INF/repo.tld"/>
+</fileset>
+<zipfileset dir="${project.dir}/web" prefix="web"/>
+</zip>
+</target>
+</project>
